@@ -5,20 +5,26 @@ import { AppModule } from '../src/modules/app.module';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
+  let module: TestingModule;
 
   beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
+    app = module.createNestApplication();
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  afterEach(async () => {
+    await app.close();
+    await module.close();
+  });
+
+  it('/instruments (GET)', () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/instruments')
       .expect(200)
-      .expect('API Works!');
+      .expect('Content-Type', /json/);
   });
 });
