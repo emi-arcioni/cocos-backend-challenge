@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { MarketData } from './marketData.entity';
+import { Order } from './order.entity';
 
 @Entity('instruments')
 export class Instrument {
@@ -13,4 +15,10 @@ export class Instrument {
 
   @Column({ length: 10 })
   type: string;
+
+  @OneToMany(() => MarketData, (marketData) => marketData.instrument)
+  marketData: MarketData[];
+
+  @OneToMany(() => Order, (order) => order.instrument)
+  orders: Order[];
 }
