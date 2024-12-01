@@ -18,10 +18,10 @@ export class GetPortfolioService {
 
     const marketValues = await this.marketDataRepository.getMarketValues();
     const marketDataMap = new Map(
-      marketValues.map((value) => [value.instrument.ticker, value.close]),
+      marketValues.map((value) => [value.instrumentId, value.close]),
     );
 
-    const portfolio: Map<string, Portfolio> = new Map();
+    const portfolio: Map<number, Portfolio> = new Map();
     let balance = 0;
 
     orders.forEach((order) => {
@@ -31,7 +31,7 @@ export class GetPortfolioService {
       balance += isCashInflow ? orderValue : -orderValue;
 
       // Get or initialize portfolio calculations for this instrument
-      const { ticker, type } = order.instrument;
+      const { id: instrumentId, type } = order.instrument;
       let {
         totalShares,
         totalCost,
@@ -41,7 +41,7 @@ export class GetPortfolioService {
         unrealizedPnL,
         totalProfit,
         performance,
-      } = portfolio.get(ticker) || {
+      } = portfolio.get(instrumentId) || {
         totalShares: 0,
         totalCost: 0,
         averagePrice: 0,
@@ -66,7 +66,7 @@ export class GetPortfolioService {
       }
 
       // Update market-dependent calculations
-      const currentPrice = marketDataMap.get(ticker) || 0;
+      const currentPrice = marketDataMap.get(instrumentId) || 0;
       marketValue = totalShares * currentPrice;
       totalCost = totalShares * averagePrice;
       unrealizedPnL = marketValue - totalCost;
@@ -77,7 +77,7 @@ export class GetPortfolioService {
           : 0;
 
       if (type === 'ACCIONES')
-        portfolio.set(ticker, {
+        portfolio.set(instrumentId, {
           totalShares,
           totalCost,
           averagePrice,

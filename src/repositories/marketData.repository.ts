@@ -13,17 +13,19 @@ export class MarketDataRepository {
   async getMarketValues(): Promise<MarketData[]> {
     return this.marketData
       .createQueryBuilder('marketData')
-      .innerJoinAndSelect('marketData.instrument', 'instrument')
-      .where((qb) => {
-        const subQuery = qb
-          .subQuery()
-          .select('MAX(md.date)')
-          .from(MarketData, 'md')
-          .where('md.instrumentId = marketData.instrumentId')
-          .getQuery();
-        return 'marketData.date = ' + subQuery;
-      })
-      .select(['marketData.close', 'marketData.date', 'instrument.ticker'])
+      .select([
+        'marketData.close',
+        'marketData.date',
+        'marketData.instrumentId',
+      ])
+      .where(
+        (qb) =>
+          `marketData.date = ${qb
+            .subQuery()
+            .select('MAX(md.date)')
+            .from(MarketData, 'md')
+            .getQuery()}`,
+      )
       .orderBy('marketData.instrumentId', 'ASC')
       .getMany();
   }

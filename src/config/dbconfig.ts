@@ -15,6 +15,7 @@ const ormConfig = {
   synchronize: false,
   migrations: [__dirname + '/../migrations/**/*{.ts,.js}'],
   migrationsRun: true,
+  logging: false,
 };
 
 // This will be used for migrations
