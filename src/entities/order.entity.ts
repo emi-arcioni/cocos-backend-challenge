@@ -7,7 +7,14 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Instrument } from './instrument.entity';
-import { OrderStatus, OrderType, OrderSide } from '../types/orders';
+import {
+  OrderStatus,
+  OrderType,
+  OrderSide,
+  OrderTypeEnum,
+  OrderSideEnum,
+  OrderStatusEnum,
+} from '../types/orders';
 
 @Entity('orders')
 export class Order {
@@ -28,13 +35,13 @@ export class Order {
   @Column('numeric', { precision: 10, scale: 2 })
   price: number;
 
-  @Column({ type: 'enum', enum: ['MARKET', 'LIMIT'] })
+  @Column({ type: 'enum', enum: OrderTypeEnum })
   type: OrderType;
 
-  @Column({ type: 'enum', enum: ['BUY', 'SELL', 'CASH_IN', 'CASH_OUT'] })
+  @Column({ type: 'enum', enum: OrderSideEnum })
   side: OrderSide;
 
-  @Column({ type: 'enum', enum: ['NEW', 'FILLED', 'REJECTED', 'CANCELLED'] })
+  @Column({ type: 'enum', enum: OrderStatusEnum })
   status: OrderStatus;
 
   @Column()

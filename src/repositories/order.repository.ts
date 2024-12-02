@@ -21,4 +21,9 @@ export class OrderRepository {
       order: { id: 'ASC' },
     });
   }
+
+  save(order: Order): Promise<Order> {
+    // TODO: Save order in database
+    return;
+  }
 }

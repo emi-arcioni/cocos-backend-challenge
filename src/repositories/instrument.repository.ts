@@ -21,4 +21,8 @@ export class InstrumentRepository {
 
     return this.instruments.find({ where });
   }
+
+  findByTicker(ticker: string): Promise<Instrument> {
+    return this.instruments.findOne({ where: { ticker } });
+  }
 }

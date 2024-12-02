@@ -6,6 +6,7 @@ import { AppService } from '../services/app.service';
 import { InstrumentsModule } from './instruments.module';
 import { typeOrmConfig } from '../config/dbconfig';
 import { PortfoliosModule } from './portfolios.module';
+import { OrdersModule } from './orders.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { PortfoliosModule } from './portfolios.module';
     TypeOrmModule.forRootAsync(typeOrmConfig),
     InstrumentsModule,
     PortfoliosModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

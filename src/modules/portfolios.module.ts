@@ -4,23 +4,21 @@ import { PortfoliosController } from '../controllers/portfolios.controller';
 import { GetPortfolioService } from '../services/get-portfolio.service';
 import { User } from '../entities/user.entity';
 import { MarketData } from '../entities/marketData.entity';
-import { OrderRepository } from '../repositories/order.repository';
 import { Order } from '../entities/order.entity';
 import { MarketDataRepository } from '../repositories/marketData.repository';
-import { UserGuard } from '../guards/user.guard';
-import { IsUserService } from '../services/is-user.service';
-import { UserRepository } from '../repositories/user.repository';
+import { OrdersModule } from './orders.module';
+import { UsersModule } from './users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Order, MarketData])],
+  imports: [
+    TypeOrmModule.forFeature([User, Order, MarketData]),
+    OrdersModule,
+    UsersModule,
+  ],
   controllers: [PortfoliosController],
   providers: [
     GetPortfolioService,
-    IsUserService,
-    UserRepository,
-    OrderRepository,
-    MarketDataRepository,
-    UserGuard,
+    MarketDataRepository, // In a future this should have it's own module
   ],
 })
 export class PortfoliosModule {}
