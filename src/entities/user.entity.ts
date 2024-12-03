@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  Index,
+} from 'typeorm';
 import { Order } from './order.entity';
 
 @Entity('users')
@@ -10,6 +16,7 @@ export class User {
   email: string;
 
   @Column({ length: 20 })
+  @Index()
   accountNumber: string;
 
   @OneToMany(() => Order, (order) => order.user)

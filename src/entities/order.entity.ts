@@ -4,29 +4,32 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Index,
+  CreateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Instrument } from './instrument.entity';
-import {
-  OrderStatus,
-  OrderType,
-  OrderSide,
-  OrderTypeEnum,
-  OrderSideEnum,
-  OrderStatusEnum,
-} from '../types/orders';
+import { OrderStatus, OrderType, OrderSide } from '../types/orders';
+
+type OrderInit = Partial<Order>;
 
 @Entity('orders')
 export class Order {
+  constructor(init?: OrderInit) {
+    Object.assign(this, init);
+  }
+
   @PrimaryGeneratedColumn()
   id: number;
 
   @ManyToOne(() => Instrument)
   @JoinColumn({ name: 'instrumentId' })
+  @Index()
   instrument: Instrument;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'userId' })
+  @Index()
   user: User;
 
   @Column()
@@ -35,15 +38,15 @@ export class Order {
   @Column('numeric', { precision: 10, scale: 2 })
   price: number;
 
-  @Column({ type: 'enum', enum: OrderTypeEnum })
+  @Column({ type: 'enum', enum: Object.values(OrderType) })
   type: OrderType;
 
-  @Column({ type: 'enum', enum: OrderSideEnum })
+  @Column({ type: 'enum', enum: Object.values(OrderSide) })
   side: OrderSide;
 
-  @Column({ type: 'enum', enum: OrderStatusEnum })
+  @Column({ type: 'enum', enum: Object.values(OrderStatus) })
   status: OrderStatus;
 
-  @Column()
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   datetime: Date;
 }

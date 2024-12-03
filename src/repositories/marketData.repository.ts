@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MarketData } from 'src/entities/marketData.entity';
+import { InstrumentType } from 'src/types/instruments';
 
 @Injectable()
 export class MarketDataRepository {
@@ -10,14 +11,11 @@ export class MarketDataRepository {
     private marketData: Repository<MarketData>,
   ) {}
 
-  async getMarketValues(): Promise<MarketData[]> {
+  async getMarketValues(ticker?: string): Promise<MarketData[]> {
     return this.marketData
       .createQueryBuilder('marketData')
-      .select([
-        'marketData.close',
-        'marketData.date',
-        'marketData.instrumentId',
-      ])
+      .leftJoinAndSelect('marketData.instrument', 'instrument')
+      .select(['marketData.close', 'marketData.date', 'instrument.id'])
       .where(
         (qb) =>
           `marketData.date = ${qb
@@ -26,6 +24,8 @@ export class MarketDataRepository {
             .from(MarketData, 'md')
             .getQuery()}`,
       )
+      .andWhere(ticker ? 'instrument.ticker = :ticker' : '1=1', { ticker })
+      .andWhere('instrument.type = :type', { type: InstrumentType.ACCIONES })
       .orderBy('marketData.instrumentId', 'ASC')
       .getMany();
   }

@@ -4,14 +4,14 @@ import {
   ValidatorConstraintInterface,
   ValidatorConstraint,
 } from 'class-validator';
-import { IsUserService } from '../services/is-user.service';
+import { GetUserService } from '../services/get-user.service';
 
 @ValidatorConstraint({ name: 'IsValidUser', async: true })
 export class IsValidUserConstraint implements ValidatorConstraintInterface {
-  constructor(private readonly isUserService: IsUserService) {}
+  constructor(private readonly getUserService: GetUserService) {}
 
   async validate(accountNumber: string) {
-    const user = await this.isUserService.execute(accountNumber);
+    const user = await this.getUserService.execute(accountNumber);
     return !!user;
   }
 

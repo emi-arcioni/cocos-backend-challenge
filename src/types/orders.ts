@@ -1,19 +1,18 @@
-export type OrderType = 'MARKET' | 'LIMIT';
-export type OrderSide = 'BUY' | 'SELL' | 'CASH_IN' | 'CASH_OUT';
-export type OrderStatus = 'NEW' | 'FILLED' | 'REJECTED' | 'CANCELLED';
+export enum OrderType {
+  MARKET = 'MARKET',
+  LIMIT = 'LIMIT',
+}
 
-export const OrderTypeEnum: OrderType[] = ['MARKET', 'LIMIT'];
+export enum OrderSide {
+  BUY = 'BUY',
+  SELL = 'SELL',
+  CASH_IN = 'CASH_IN',
+  CASH_OUT = 'CASH_OUT',
+}
 
-export const OrderSideEnum: OrderSide[] = [
-  'BUY',
-  'SELL',
-  'CASH_IN',
-  'CASH_OUT',
-];
-
-export const OrderStatusEnum: OrderStatus[] = [
-  'NEW',
-  'FILLED',
-  'REJECTED',
-  'CANCELLED',
-];
+export enum OrderStatus {
+  NEW = 'NEW',
+  FILLED = 'FILLED',
+  REJECTED = 'REJECTED',
+  CANCELLED = 'CANCELLED',
+}

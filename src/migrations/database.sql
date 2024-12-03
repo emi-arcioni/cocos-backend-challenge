@@ -4,17 +4,21 @@ CREATE TABLE users (
   "email" VARCHAR(255),
   "accountNumber" VARCHAR(20)
 );
+CREATE INDEX idx_users_accountnumber ON users ("accountNumber");
+
+CREATE TYPE order_type AS ENUM ('MARKET', 'LIMIT');
+CREATE TYPE order_side AS ENUM ('BUY', 'SELL', 'CASH_IN', 'CASH_OUT');
+CREATE TYPE order_status AS ENUM ('NEW', 'FILLED', 'REJECTED', 'CANCELLED');
+CREATE TYPE instrument_type AS ENUM ('ACCIONES', 'MONEDA');
 
 CREATE TABLE instruments (
   "id" SERIAL PRIMARY KEY,
   "ticker" VARCHAR(10),
   "name" VARCHAR(255),
-  "type" VARCHAR(10)
+  "type" instrument_type
 );
-
-CREATE TYPE order_type AS ENUM ('MARKET', 'LIMIT');
-CREATE TYPE order_side AS ENUM ('BUY', 'SELL', 'CASH_IN', 'CASH_OUT');
-CREATE TYPE order_status AS ENUM ('NEW', 'FILLED', 'REJECTED', 'CANCELLED');
+CREATE INDEX idx_instruments_ticker ON instruments ("ticker");
+CREATE INDEX idx_instruments_type ON instruments ("type");
 
 CREATE TABLE orders (
   "id" SERIAL PRIMARY KEY,
@@ -25,10 +29,12 @@ CREATE TABLE orders (
   "type" order_type,
   "side" order_side,
   "status" order_status,
-  "datetime" TIMESTAMP,
+  "datetime" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY ("instrumentId") REFERENCES instruments(id),
   FOREIGN KEY ("userId") REFERENCES users(id)
 );
+CREATE INDEX idx_orders_instrumentid ON orders ("instrumentId");
+CREATE INDEX idx_orders_userid ON orders ("userId");
 
 CREATE TABLE marketdata (
   "id" SERIAL PRIMARY KEY,
@@ -41,6 +47,8 @@ CREATE TABLE marketdata (
   "date" DATE,
   FOREIGN KEY ("instrumentId") REFERENCES instruments(id)
 );
+CREATE INDEX idx_marketdata_instrumentid ON marketdata ("instrumentId");
+CREATE INDEX idx_marketdata_date ON marketdata ("date");
 
 INSERT INTO users ("email","accountNumber") VALUES
    ('emiliano@test.com','10001'),

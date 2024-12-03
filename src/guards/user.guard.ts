@@ -4,19 +4,19 @@ import {
   ExecutionContext,
   NotFoundException,
 } from '@nestjs/common';
-import { IsUserService } from '../services/is-user.service';
+import { GetUserService } from '../services/get-user.service';
 
 @Injectable()
 export class UserGuard implements CanActivate {
-  constructor(private readonly isUserService: IsUserService) {}
+  constructor(private readonly getUserService: GetUserService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const accountNumber = request.params.accountNumber;
 
-    const userExists = await this.isUserService.execute(accountNumber);
+    const user = await this.getUserService.execute(accountNumber);
 
-    if (!userExists) {
+    if (!user) {
       throw new NotFoundException('User not found');
     }
 

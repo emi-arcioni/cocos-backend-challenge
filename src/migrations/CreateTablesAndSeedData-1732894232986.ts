@@ -15,5 +15,9 @@ export class CreateTablesAndSeedData1732894232986
     await queryRunner.query(`DROP TABLE IF EXISTS marketdata;`);
     await queryRunner.query(`DROP TABLE IF EXISTS instruments;`);
     await queryRunner.query(`DROP TABLE IF EXISTS users;`);
+    await queryRunner.query(`DROP TYPE IF EXISTS order_type;`);
+    await queryRunner.query(`DROP TYPE IF EXISTS order_side;`);
+    await queryRunner.query(`DROP TYPE IF EXISTS order_status;`);
+    await queryRunner.query(`DROP TYPE IF EXISTS instrument_type;`);
   }
 }

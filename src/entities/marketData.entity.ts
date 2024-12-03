@@ -4,6 +4,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Index,
 } from 'typeorm';
 import { Instrument } from './instrument.entity';
 
@@ -12,11 +13,9 @@ export class MarketData {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  instrumentId: number;
-
   @ManyToOne(() => Instrument)
   @JoinColumn({ name: 'instrumentId' })
+  @Index()
   instrument: Instrument;
 
   @Column('numeric', { precision: 10, scale: 2 })
@@ -34,6 +33,7 @@ export class MarketData {
   @Column('numeric', { precision: 10, scale: 2 })
   previousClose: number;
 
-  @Column()
+  @Column('timestamp')
+  @Index()
   date: Date;
 }

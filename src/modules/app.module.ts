@@ -7,6 +7,7 @@ import { InstrumentsModule } from './instruments.module';
 import { typeOrmConfig } from '../config/dbconfig';
 import { PortfoliosModule } from './portfolios.module';
 import { OrdersModule } from './orders.module';
+import { MarketDataModule } from './marketData.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { OrdersModule } from './orders.module';
     InstrumentsModule,
     PortfoliosModule,
     OrdersModule,
+    MarketDataModule,
   ],
   controllers: [AppController],
   providers: [AppService],

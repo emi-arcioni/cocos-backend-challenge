@@ -9,5 +9,5 @@ export type Portfolio = {
   unrealizedPnL: number;
   totalProfit: number;
   performance: number;
-  instrument: Partial<Instrument>;
+  instrument: Pick<Instrument, 'ticker' | 'name'>;
 };

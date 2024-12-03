@@ -1,6 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  Index,
+} from 'typeorm';
 import { MarketData } from './marketData.entity';
 import { Order } from './order.entity';
+import { InstrumentType } from '../types/instruments';
 
 @Entity('instruments')
 export class Instrument {
@@ -8,13 +15,15 @@ export class Instrument {
   id: number;
 
   @Column({ length: 10 })
+  @Index({ unique: true })
   ticker: string;
 
   @Column({ length: 255 })
   name: string;
 
-  @Column({ length: 10 })
-  type: string;
+  @Column({ type: 'enum', enum: Object.values(InstrumentType) })
+  @Index()
+  type: InstrumentType;
 
   @OneToMany(() => MarketData, (marketData) => marketData.instrument)
   marketData: MarketData[];

@@ -6,12 +6,7 @@ import {
   IsPositive,
   ValidateIf,
 } from 'class-validator';
-import {
-  OrderSide,
-  OrderSideEnum,
-  OrderType,
-  OrderTypeEnum,
-} from '../../types/orders';
+import { OrderSide, OrderType } from '../../types/orders';
 import { IsValidTicker } from '../../validators/is-valid-ticker.validator';
 import { IsValidUser } from '../../validators/is-valid-user.validator';
 export class CreateOrderDto {
@@ -20,14 +15,16 @@ export class CreateOrderDto {
   accountNumber: string;
 
   @ValidateIf(
-    (object) => object.side !== 'CASH_IN' && object.side !== 'CASH_OUT',
+    (object) =>
+      object.side !== OrderSide.CASH_IN && object.side !== OrderSide.CASH_OUT,
   )
   @IsNotEmpty()
-  @IsIn(OrderTypeEnum)
+  @IsIn(Object.values(OrderType))
   type: OrderType;
 
   @ValidateIf(
-    (object) => object.side !== 'CASH_IN' && object.side !== 'CASH_OUT',
+    (object) =>
+      object.side !== OrderSide.CASH_IN && object.side !== OrderSide.CASH_OUT,
   )
   @IsNotEmpty()
   @IsValidTicker()
@@ -35,20 +32,22 @@ export class CreateOrderDto {
 
   @ValidateIf(
     (object) =>
-      !object.price || object.side === 'CASH_IN' || object.side === 'CASH_OUT',
+      !object.price ||
+      object.side === OrderSide.CASH_IN ||
+      object.side === OrderSide.CASH_OUT,
   )
   @IsNotEmpty()
   @IsInt()
   @IsPositive()
   size: number;
 
-  @ValidateIf((object) => !object.size)
+  @ValidateIf((object) => !object.size || object.type === OrderType.LIMIT)
   @IsNotEmpty()
   @IsNumber()
   @IsPositive()
   price: number;
 
   @IsNotEmpty()
-  @IsIn(OrderSideEnum)
+  @IsIn(Object.values(OrderSide))
   side: OrderSide;
 }

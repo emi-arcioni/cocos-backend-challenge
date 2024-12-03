@@ -23,7 +23,6 @@ export class OrderRepository {
   }
 
   save(order: Order): Promise<Order> {
-    // TODO: Save order in database
-    return;
+    return this.orders.save(order);
   }
 }
