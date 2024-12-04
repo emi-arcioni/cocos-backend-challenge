@@ -22,8 +22,8 @@ export class SetOrderService {
   async execute(createOrderDto: CreateOrderDto): Promise<Order> {
     // TODO: implement locking mechanism
 
-    const { accountNumber, size, side } = createOrderDto;
-    let { type, price, ticker } = createOrderDto;
+    const { accountNumber, side, investmentAmount } = createOrderDto;
+    let { type, price, size, ticker } = createOrderDto;
     let status: OrderStatus = OrderStatus.FILLED;
 
     ticker =
@@ -61,29 +61,37 @@ export class SetOrderService {
       [OrderSide.BUY, OrderSide.SELL].includes(side)
     ) {
       const marketValue = await this.getMarketValuesService.execute(ticker);
-      price = marketValue.get(instrument.id);
+      price = Number(marketValue.get(instrument.id));
 
-      // TODO: Allow user to send either exact number of shares or total investment amount
-      // in pesos (in this case, calculate maximum number of shares that can be sent,
-      // fractional shares are not allowed).
+      // For market buy orders with investment amount, calculate the maximum number of shares that can be bought
+      // by dividing the investment amount by the current market price and rounding down to ensure sufficient funds
+      if (!size && investmentAmount) {
+        size = Math.floor(investmentAmount / price);
+      }
     }
 
     // For BUY orders, validate if user has sufficient balance to cover the total cost (price * size)
     const buyWithEnoughBalance =
-      side === OrderSide.BUY && portfolio.balance >= price * size;
+      side !== OrderSide.BUY ||
+      portfolio.balance >= Number(price) * Number(size);
 
     // For SELL orders, validate if user has sufficient shares in their portfolio to execute the sell order
     const sellWithEnoughShares =
-      side === OrderSide.SELL && instrumentBalance.totalShares >= size;
+      side !== OrderSide.SELL ||
+      (instrumentBalance?.totalShares || 0) >= Number(size);
 
     // For CASH_OUT orders, verify that the user's portfolio has sufficient balance to withdraw the requested amount
     const cashOutWithEnoughBalance =
-      side === OrderSide.CASH_OUT && portfolio.balance >= size;
+      side !== OrderSide.CASH_OUT || portfolio.balance >= Number(size);
+
+    // When investment amount is provided instead of size, verify that it's sufficient to buy at least 1 share at current market price
+    const investmentAmountIsEnough = !investmentAmount || size > 0;
 
     if (
       !buyWithEnoughBalance ||
       !sellWithEnoughShares ||
-      !cashOutWithEnoughBalance
+      !cashOutWithEnoughBalance ||
+      !investmentAmountIsEnough
     ) {
       status = OrderStatus.REJECTED;
     }

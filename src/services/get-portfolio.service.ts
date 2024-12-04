@@ -27,12 +27,12 @@ export class GetPortfolioService {
 
     if (side === OrderSide.BUY) {
       // For buy orders: update average price and increase total shares
-      const newTotalCost = averagePrice * totalShares + size * price;
+      const newTotalCost = averagePrice * totalShares + size * Number(price);
       totalShares += size;
       averagePrice = newTotalCost / totalShares;
     } else if (side === OrderSide.SELL) {
       // For sell orders: calculate realized profit and decrease total shares
-      const profitPerShare = price - averagePrice;
+      const profitPerShare = Number(price) - averagePrice;
       netProfit += profitPerShare * size;
       totalShares -= size;
     }
@@ -104,6 +104,7 @@ export class GetPortfolioService {
           unrealizedPnL: 0,
           totalProfit: 0,
           performance: 0,
+          orders: [],
         } as Portfolio);
 
       // Update position with new order and current market price
@@ -122,6 +123,12 @@ export class GetPortfolioService {
             ticker: order.instrument.ticker,
             name: order.instrument.name,
           },
+          orders: [
+            ...currentPosition.orders,
+            // Ignore the linter warning since we intentionally omit instrument
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            (({ instrument, ...rest }) => rest)(order),
+          ],
         });
       }
     });

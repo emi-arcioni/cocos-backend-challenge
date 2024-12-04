@@ -1,3 +1,4 @@
+import { Order } from '../entities/order.entity';
 import { Instrument } from '../entities/instrument.entity';
 
 export type Portfolio = {
@@ -10,4 +11,5 @@ export type Portfolio = {
   totalProfit: number;
   performance: number;
   instrument: Pick<Instrument, 'ticker' | 'name'>;
+  orders: Omit<Order, 'instrument'>[];
 };

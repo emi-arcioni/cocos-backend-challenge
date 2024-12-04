@@ -15,16 +15,14 @@ export class CreateOrderDto {
   accountNumber: string;
 
   @ValidateIf(
-    (object) =>
-      object.side !== OrderSide.CASH_IN && object.side !== OrderSide.CASH_OUT,
+    (object) => ![OrderSide.CASH_IN, OrderSide.CASH_OUT].includes(object.side),
   )
   @IsNotEmpty()
   @IsIn(Object.values(OrderType))
   type: OrderType;
 
   @ValidateIf(
-    (object) =>
-      object.side !== OrderSide.CASH_IN && object.side !== OrderSide.CASH_OUT,
+    (object) => ![OrderSide.CASH_IN, OrderSide.CASH_OUT].includes(object.side),
   )
   @IsNotEmpty()
   @IsValidTicker()
@@ -32,16 +30,29 @@ export class CreateOrderDto {
 
   @ValidateIf(
     (object) =>
-      !object.price ||
-      object.side === OrderSide.CASH_IN ||
-      object.side === OrderSide.CASH_OUT,
+      (!object.price && !object.investmentAmount) ||
+      [OrderSide.CASH_IN, OrderSide.CASH_OUT, OrderSide.SELL].includes(
+        object.side,
+      ),
   )
   @IsNotEmpty()
   @IsInt()
   @IsPositive()
   size: number;
 
-  @ValidateIf((object) => !object.size || object.type === OrderType.LIMIT)
+  @ValidateIf(
+    (object) => !object.price && !object.size && object.side === OrderSide.BUY,
+  )
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  investmentAmount: number;
+
+  @ValidateIf(
+    (object) =>
+      (!object.size && !object.investmentAmount) ||
+      object.type === OrderType.LIMIT,
+  )
   @IsNotEmpty()
   @IsNumber()
   @IsPositive()
