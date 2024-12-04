@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Order } from '../entities/order.entity';
-import { OrderRepository } from '../repositories/order.repository';
 import { CreateOrderDto } from '../entities/dto/create-order.dto';
 import { GetInstrumentService } from './get-instrument.service';
 import { GetUserService } from './get-user.service';
@@ -13,7 +12,6 @@ import { GetMarketValuesService } from './get-marketvalues.service';
 @Injectable()
 export class SetOrderService {
   constructor(
-    private readonly orderRepository: OrderRepository,
     private readonly getInstrumentService: GetInstrumentService,
     private readonly getUserService: GetUserService,
     private readonly getPortfolioService: GetPortfolioService,
@@ -119,7 +117,6 @@ export class SetOrderService {
         status,
       });
 
-      // return this.orderRepository.save(order);
       const savedOrder = await queryRunner.manager.save(order);
       await queryRunner.commitTransaction();
       return savedOrder;
