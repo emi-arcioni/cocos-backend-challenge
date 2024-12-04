@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { MarketData } from 'src/entities/marketData.entity';
-import { InstrumentType } from 'src/types/instruments';
+import { MarketData } from '../entities/marketData.entity';
+import { InstrumentType } from '../types/instruments';
 
 @Injectable()
 export class MarketDataRepository {
