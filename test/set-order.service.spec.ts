@@ -1,18 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SetOrderService } from '../src/services/set-order.service';
-import { MarketDataRepository } from '../src/repositories/marketData.repository';
-import { CreateOrderDto } from '../src/entities/dto/create-order.dto';
-import { OrderSide, OrderStatus, OrderType } from '../src/types/orders';
-import { OrderRepository } from '../src/repositories/order.repository';
+import { MarketDataRepository } from '../src/market-data/market-data.repository';
+import { CreateOrderDto } from '../src/orders/dto/create-order.dto';
+import { OrderSide, OrderStatus, OrderType } from '../src/orders/types/orders';
+import { OrderRepository } from '../src/orders/order.repository';
 import { GetInstrumentService } from '../src/services/get-instrument.service';
 import { GetUserService } from '../src/services/get-user.service';
-import { GetPortfolioService } from '../src/services/get-portfolio.service';
 import { GetMarketValuesService } from '../src/services/get-marketvalues.service';
-import { InstrumentRepository } from '../src/repositories/instrument.repository';
-import { UserRepository } from '../src/repositories/user.repository';
-import { InstrumentType } from '../src/types/instruments';
+import { InstrumentRepository } from '../src/instruments/instrument.repository';
+import { UserRepository } from '../src/users/user.repository';
+import { InstrumentType } from '../src/instruments/types/instruments';
 import { DataSource } from 'typeorm';
-import { Order } from '../src/entities/order.entity';
+import { Order } from '../src/orders/entities/order.entity';
 
 describe('SetOrderService', () => {
   let service: SetOrderService;
@@ -81,7 +80,6 @@ describe('SetOrderService', () => {
         SetOrderService,
         GetInstrumentService,
         GetUserService,
-        GetPortfolioService,
         GetMarketValuesService,
         {
           provide: DataSource,

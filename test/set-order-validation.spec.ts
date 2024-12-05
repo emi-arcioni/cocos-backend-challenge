@@ -1,8 +1,8 @@
 import * as request from 'supertest';
-import { OrderSide, OrderType } from '../src/types/orders';
+import { OrderSide, OrderType } from '../src/orders/types/orders';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../src/modules/app.module';
+import { AppModule } from '../src/app/app.module';
 import { useContainer } from 'class-validator';
 import { SetOrderService } from '../src/services/set-order.service';
 

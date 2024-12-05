@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { InstrumentsController } from '../src/controllers/instruments.controller';
+import { InstrumentsController } from '../src/instruments/instruments.controller';
 import { GetInstrumentsService } from '../src/services/get-instruments.service';
 
 describe('InstrumentsController', () => {

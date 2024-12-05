@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GetInstrumentsService } from '../src/services/get-instruments.service';
-import { InstrumentRepository } from '../src/repositories/instrument.repository';
+import { InstrumentRepository } from '../src/instruments/instrument.repository';
 
 describe('GetInstrumentsService', () => {
   let service: GetInstrumentsService;
