@@ -7,7 +7,7 @@ import {
 import { GetUserService } from '../services/get-user.service';
 
 @Injectable()
-export class UserGuard implements CanActivate {
+export class UserExistsGuard implements CanActivate {
   constructor(private readonly getUserService: GetUserService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

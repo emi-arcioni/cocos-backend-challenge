@@ -4,11 +4,21 @@ import { User } from '../entities/user.entity';
 import { UserRepository } from '../repositories/user.repository';
 import { GetUserService } from '../services/get-user.service';
 import { IsValidUserConstraint } from '../validators/is-valid-user.validator';
-import { UserGuard } from '../guards/user.guard';
+import { UserExistsGuard } from '../guards/user-exists.guard';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
-  providers: [UserRepository, GetUserService, IsValidUserConstraint, UserGuard],
-  exports: [UserRepository, GetUserService, IsValidUserConstraint, UserGuard],
+  providers: [
+    UserRepository,
+    GetUserService,
+    IsValidUserConstraint,
+    UserExistsGuard,
+  ],
+  exports: [
+    UserRepository,
+    GetUserService,
+    IsValidUserConstraint,
+    UserExistsGuard,
+  ],
 })
 export class UsersModule {}
