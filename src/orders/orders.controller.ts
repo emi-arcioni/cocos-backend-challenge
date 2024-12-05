@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { OrderStatus } from './types/orders';
+import { OrderStatus } from './enums/OrderStatus.enum';
 import { Response } from 'express';
 
 @Controller('orders')

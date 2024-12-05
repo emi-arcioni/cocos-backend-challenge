@@ -1,7 +1,7 @@
 import { Command, CommandRunner } from 'nest-commander';
-import { UserRepository } from '../users/user.repository';
+import { UserRepository } from '../../users/user.repository';
 import { Injectable } from '@nestjs/common';
-import { PortfoliosService } from '../portfolios/portfolios.service';
+import { PortfoliosService } from '../../portfolios/portfolios.service';
 
 @Injectable()
 @Command({

@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { MarketData } from '../../market-data/entities/market-data.entity';
 import { Order } from '../../orders/entities/order.entity';
-import { InstrumentType } from '../types/instruments';
+import { InstrumentType } from '../../common/enums/InstrumentType.enum';
 
 @Entity('instruments')
 export class Instrument {

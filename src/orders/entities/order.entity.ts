@@ -9,7 +9,9 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Instrument } from '../../instruments/entities/instrument.entity';
-import { OrderStatus, OrderType, OrderSide } from '../types/orders';
+import { OrderStatus } from '../enums/OrderStatus.enum';
+import { OrderType } from '../enums/OrderType.enum';
+import { OrderSide } from '../enums/OrderSide.enum';
 
 type OrderInit = Partial<Order>;
 

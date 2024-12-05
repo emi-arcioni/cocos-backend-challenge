@@ -4,11 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { InstrumentsModule } from '../instruments/instruments.module';
-import { typeOrmConfig } from '../config/dbconfig';
+import { typeOrmConfig } from '../common/config/dbconfig';
 import { PortfoliosModule } from '../portfolios/portfolios.module';
 import { OrdersModule } from '../orders/orders.module';
 import { MarketDataModule } from '../market-data/market-data.module';
-import { SyncPortfoliosCommand } from '../scripts/sync-portfolios';
+import { SyncPortfoliosCommand } from '../common/scripts/sync-portfolios';
 import { UsersModule } from '../users/users.module';
 
 @Module({

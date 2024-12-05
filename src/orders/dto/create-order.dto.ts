@@ -6,7 +6,8 @@ import {
   IsPositive,
   ValidateIf,
 } from 'class-validator';
-import { OrderSide, OrderType } from '../types/orders';
+import { OrderSide } from '../enums/OrderSide.enum';
+import { OrderType } from '../enums/OrderType.enum';
 import { IsValidTicker } from '../../instruments/validators/is-valid-ticker.validator';
 import { IsValidUser } from '../../users/validators/is-valid-user.validator';
 export class CreateOrderDto {

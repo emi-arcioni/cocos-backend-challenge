@@ -4,12 +4,12 @@ import { Portfolio } from './entities/portfolio.entity';
 import { MarketDataService } from '../market-data/market-data.service';
 import { OrderRepository } from '../orders/order.repository';
 import { UsersService } from '../users/users.service';
-import { OrderStatus } from '../orders/types/orders';
+import { OrderStatus } from '../orders/enums/OrderStatus.enum';
 import { EntityManager } from 'typeorm';
-import { OrderSide } from '../orders/types/orders';
+import { OrderSide } from '../orders/enums/OrderSide.enum';
 import { PortfolioOverview } from './types/PortfolioOverview.type';
 import { Order } from '../orders/entities/order.entity';
-import { InstrumentType } from '../instruments/types/instruments';
+import { InstrumentType } from '../common/enums/InstrumentType.enum';
 
 @Injectable()
 export class PortfoliosService {
