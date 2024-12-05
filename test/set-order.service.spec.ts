@@ -2,8 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SetOrderService } from '../src/services/set-order.service';
 import { MarketDataRepository } from '../src/repositories/marketData.repository';
 import { CreateOrderDto } from '../src/entities/dto/create-order.dto';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { OrderSide } from '../src/types/orders';
+import { OrderSide, OrderStatus, OrderType } from '../src/types/orders';
 import { OrderRepository } from '../src/repositories/order.repository';
 import { GetInstrumentService } from '../src/services/get-instrument.service';
 import { GetUserService } from '../src/services/get-user.service';
@@ -13,10 +12,11 @@ import { InstrumentRepository } from '../src/repositories/instrument.repository'
 import { UserRepository } from '../src/repositories/user.repository';
 import { InstrumentType } from '../src/types/instruments';
 import { DataSource } from 'typeorm';
+import { Order } from '../src/entities/order.entity';
 
 describe('SetOrderService', () => {
   let service: SetOrderService;
-  let orders: any[] = [];
+  let orders: Order[] = [];
 
   beforeEach(async () => {
     orders = []; // Reset orders array before each test
@@ -37,11 +37,22 @@ describe('SetOrderService', () => {
         {
           provide: InstrumentRepository,
           useValue: {
-            findByTicker: jest.fn().mockResolvedValue({
-              id: 66,
-              ticker: 'ARS',
-              type: InstrumentType.MONEDA,
-              name: 'Pesos',
+            findByTicker: jest.fn().mockImplementation((ticker) => {
+              const instruments = {
+                ARS: {
+                  id: 66,
+                  ticker: 'ARS',
+                  type: InstrumentType.MONEDA,
+                  name: 'Pesos',
+                },
+                HAVA: {
+                  id: 64,
+                  ticker: 'HAVA',
+                  type: InstrumentType.ACCIONES,
+                  name: 'Havanna Holding',
+                },
+              };
+              return Promise.resolve(instruments[ticker]);
             }),
           },
         },
@@ -51,7 +62,7 @@ describe('SetOrderService', () => {
             findOne: jest.fn().mockResolvedValue({
               id: 1,
               accountNumber: '1234567890',
-              name: 'Test User',
+              email: 'test@test.com',
             }),
           },
         },
@@ -61,20 +72,11 @@ describe('SetOrderService', () => {
             getMarketValues: jest.fn().mockResolvedValue([
               {
                 close: 100.5,
-                date: new Date('2024-03-20'),
-                instrument: { id: 1 },
-              },
-              {
-                close: 45.75,
-                date: new Date('2024-03-20'),
-                instrument: { id: 2 },
+                date: new Date('2024-04-20'),
+                instrument: { id: 64 },
               },
             ]),
           },
-        },
-        {
-          provide: getRepositoryToken(MarketDataRepository),
-          useValue: {},
         },
         SetOrderService,
         GetInstrumentService,
@@ -171,5 +173,45 @@ describe('SetOrderService', () => {
     }, 0);
 
     expect(finalBalance).toBe(200); // 1000 - (400 * 2) = 200
+  });
+
+  // Additional tests for order creation
+  describe('execute', () => {
+    it('should successfully execute a buy order', async () => {
+      // add a chash to increase the balance
+      await service.execute({
+        accountNumber: '1234567890',
+        size: 100000,
+        side: OrderSide.CASH_IN,
+      } as CreateOrderDto);
+
+      const orderDto: Partial<CreateOrderDto> = {
+        accountNumber: '1234567890',
+        size: 10,
+        side: OrderSide.BUY,
+        type: OrderType.MARKET,
+        ticker: 'HAVA',
+      };
+
+      const result = await service.execute(orderDto as CreateOrderDto);
+
+      expect(result).toBeDefined();
+      expect(result.side).toBe(OrderSide.BUY);
+      expect(result.size).toBe(10);
+      expect(result.price).toBe(100.5);
+    });
+
+    it('should throw an error for invalid order execution', async () => {
+      const invalidOrderDto: Partial<CreateOrderDto> = {
+        accountNumber: '1234567890',
+        size: 1000,
+        side: OrderSide.BUY,
+        type: OrderType.MARKET,
+        ticker: 'HAVA',
+      };
+
+      const result = await service.execute(invalidOrderDto as CreateOrderDto);
+      expect(result.status).toBe(OrderStatus.REJECTED);
+    });
   });
 });

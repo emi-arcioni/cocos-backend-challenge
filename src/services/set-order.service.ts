@@ -72,7 +72,7 @@ export class SetOrderService {
         [OrderSide.BUY, OrderSide.SELL].includes(side)
       ) {
         const marketValue = await this.getMarketValuesService.execute(ticker);
-        price = Number(marketValue.get(instrument.id));
+        price = Number(marketValue.get(instrument?.id));
 
         // For market buy orders with investment amount, calculate the maximum number of shares that can be bought
         // by dividing the investment amount by the current market price and rounding down to ensure sufficient funds
