@@ -92,7 +92,7 @@ $ npm run test:cov
   - Cancel an order by ID
   - Returns different status codes based on results: 
     - 200: Order successfully cancelled
-    - 400: Order not found
+    - 404: Order not found
 
 #### Portfolios
 - `GET /portfolios/:accountNumber` 
