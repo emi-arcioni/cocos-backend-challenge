@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GetInstrumentsService } from '../src/services/get-instruments.service';
-import { InstrumentRepository } from '../src/instruments/instrument.repository';
+import { InstrumentsService } from './instruments.service';
+import { InstrumentRepository } from './instrument.repository';
 
-describe('GetInstrumentsService', () => {
-  let service: GetInstrumentsService;
+describe('InstrumentsService', () => {
+  let service: InstrumentsService;
   let mockInstrumentRepository: Partial<InstrumentRepository>;
   let module: TestingModule;
 
@@ -14,7 +14,7 @@ describe('GetInstrumentsService', () => {
 
     module = await Test.createTestingModule({
       providers: [
-        GetInstrumentsService,
+        InstrumentsService,
         {
           provide: InstrumentRepository,
           useValue: mockInstrumentRepository,
@@ -22,7 +22,7 @@ describe('GetInstrumentsService', () => {
       ],
     }).compile();
 
-    service = module.get<GetInstrumentsService>(GetInstrumentsService);
+    service = module.get<InstrumentsService>(InstrumentsService);
   });
 
   afterEach(async () => {
@@ -42,7 +42,7 @@ describe('GetInstrumentsService', () => {
       .fn()
       .mockResolvedValue(mockInstruments);
 
-    const result = await service.execute();
+    const result = await service.findAll();
     expect(result).toEqual(mockInstruments);
     expect(mockInstrumentRepository.findAll).toHaveBeenCalled();
   });

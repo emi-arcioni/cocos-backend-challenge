@@ -1,30 +1,31 @@
 import * as request from 'supertest';
-import { OrderSide, OrderType } from '../src/orders/types/orders';
+import { OrderSide } from '../src/orders/enums/OrderSide.enum';
+import { OrderType } from '../src/orders/enums/OrderType.enum';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app/app.module';
 import { useContainer } from 'class-validator';
-import { SetOrderService } from '../src/services/set-order.service';
+import { OrdersService } from '../src/orders/orders.service';
 
 describe('POST /orders validation', () => {
   let app: INestApplication;
   let module: TestingModule;
-  let setOrderService: SetOrderService;
+  let ordersService: OrdersService;
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(SetOrderService)
+      .overrideProvider(OrdersService)
       .useValue({
-        execute: jest.fn().mockResolvedValue({}),
+        create: jest.fn().mockResolvedValue({}),
       })
       .compile();
 
     app = module.createNestApplication();
     useContainer(app.select(AppModule), { fallbackOnErrors: true });
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
-    setOrderService = module.get<SetOrderService>(SetOrderService);
+    ordersService = module.get<OrdersService>(OrdersService);
     await app.init();
   });
 
@@ -94,7 +95,7 @@ describe('POST /orders validation', () => {
     };
 
     await request(app.getHttpServer()).post('/orders').send(orderData);
-    expect(setOrderService.execute).toHaveBeenCalledWith(orderData);
+    expect(ordersService.create).toHaveBeenCalledWith(orderData);
   });
 
   it('should validate size for sell and cash orders', async () => {
@@ -157,7 +158,7 @@ describe('POST /orders validation', () => {
     };
 
     await request(app.getHttpServer()).post('/orders').send(orderData);
-    expect(setOrderService.execute).toHaveBeenCalledWith(orderData);
+    expect(ordersService.create).toHaveBeenCalledWith(orderData);
   });
 
   it('should accept valid market buy order with investment amount', async () => {
@@ -170,6 +171,6 @@ describe('POST /orders validation', () => {
     };
 
     await request(app.getHttpServer()).post('/orders').send(orderData);
-    expect(setOrderService.execute).toHaveBeenCalledWith(orderData);
+    expect(ordersService.create).toHaveBeenCalledWith(orderData);
   });
 });

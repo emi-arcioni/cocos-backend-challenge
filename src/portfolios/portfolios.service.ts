@@ -163,8 +163,6 @@ export class PortfoliosService {
     });
 
     // Use repository method for upsert
-    return entityManager
-      ? this.portfolioRepository.upsert(portfolio, entityManager)
-      : this.portfolioRepository.upsert(portfolio);
+    return this.portfolioRepository.upsert(portfolio, entityManager);
   }
 }
