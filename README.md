@@ -7,6 +7,7 @@ This is a NestJS-based application that implements a simplified version of a sto
 
 - Place market and limit orders to buy/sell stocks
 - Make cash deposits and withdrawals 
+- Cancel orders
 - Validate orders based on available balance and holdings
 - Track portfolio positions and transactions
 - Retrieve available instruments
@@ -17,16 +18,17 @@ The implementation follows the requirements specified in the Cocos Backend Chall
 ## Project Setup
 
 1. Clone the repository
-2. Install dependencies
+
+1. Create a `.env` file in the root directory by copying the `.env.example` file, and complete the `.env` file with the correct database credentials
+
+1. Install dependencies
     ```bash
     $ npm install
     ```
 
-3. Create a `.env` file in the root directory by copying the `.env.example` file
-
-4. Complete the `.env` file with the correct database credentials
-
-5. Run the database migrations
+### Migrations
+Although there is a post-install script that runs the database migrations and syncs the portfolios, it's recommended to run the migrations manually to ensure everything is set up correctly.
+1. Run the database migrations
     ```bash
     $ npm run migration:run
     ```
@@ -34,19 +36,18 @@ The implementation follows the requirements specified in the Cocos Backend Chall
     ```bash
     $ npm run migration:revert
     ```
+1. Sync the portfolios
+    ```bash
+    $ npm run sync-portfolios
+    ```
 
 ## Running the Application
 
 ```bash
-# development mode
 $ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
+
+There are other scripts to run the application in watch mode and production mode, but the recommended way to run the application is using the `start` script.
 
 ## Testing
 
@@ -77,6 +78,11 @@ $ npm run test:cov
     - 202: Order filled
     - 400: Order rejected
     - 200: Other statuses
+- `DELETE /orders/:id`
+  - Cancel an order by ID
+  - Returns different status codes based on results: 
+    - 200: Order successfully cancelled
+    - 400: Order not found
 
 #### Portfolios
 - `GET /portfolios/:accountNumber` 
@@ -89,6 +95,8 @@ $ npm run test:cov
   - Optional query parameters:
     - `ticker`: Filter by instrument ticker
     - `name`: Filter by instrument name
+    - `page`: Pagination
+    - `limit`: Pagination
 
 ### Request Examples
 
@@ -128,6 +136,18 @@ $ npm run lint
 $ npm run format
 ```
 
-## Resources
+## Design decisions
 
-- [NestJS Documentation](https://docs.nestjs.com)
+- **Portfolios**: I've decided to use a consolidated portfolio object to track positions and balances, as it simplifies the retrieval of portfolio information and reduces the number of database queries.
+
+  Each time a new order is created, the portfolio for that user is re-calculated to reflect the updated positions and balance. This synchronization ensures that the portfolio always represents the current state after every transaction.
+
+- **Database**: I've noticed a lack of indexes definitions for different tables, so I added some of them, specially in the `orders` table where I created a indexes on the `instrumentId` and `userId` columns to improve the performance of the queries.
+
+- **Folder structure / Modules**: I've created a separate module for each main entity of the system (Instruments, Market Data, Orders, Portfolios, Users), as it makes the code easier to understand and maintain, and it's based on NestJS best practices as well.
+
+- **Locking mechanism**: I've added a pesimistic locking strategy to prevent race conditions when creating the orders and updating the portfolio. I've used TypeORM query runner transactions since it's a simple and effective way to handle the locking mechanism.
+
+## Business assumptions
+
+- **Balance calculations** In orders.service.ts, `create()` method, you will find comments explaining the assumptions made for the balance calculations.
