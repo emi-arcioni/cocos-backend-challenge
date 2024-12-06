@@ -13,7 +13,7 @@ const ormConfig = {
   database: process.env.DB_NAME,
   entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
   synchronize: false,
-  migrations: [__dirname + '/../../migrations/**/*{.ts,.js}'],
+  migrations: [__dirname + '/../migrations/**/*{.ts,.js}'],
   migrationsRun: true,
   logging: false,
 };

@@ -14,12 +14,22 @@ This is a NestJS-based application that implements a simplified version of a sto
 
 The implementation follows the requirements specified in the Cocos Backend Challenge (https://github.com/cocos-capital/cocos-challenge/blob/main/backend-challenge.md).
 
+## Requirements
+
+- Node.js v20.18.0
+- Postgres >= v16.1
+- Docker (optional)
 
 ## Project Setup
 
 1. Clone the repository
 
 1. Create a `.env` file in the root directory by copying the `.env.example` file, and complete the `.env` file with the correct database credentials
+
+1. (Optional) Run the docker compose file to start the Postgres database
+    ```bash
+    $ docker compose up -d
+    ```
 
 1. Install dependencies
     ```bash

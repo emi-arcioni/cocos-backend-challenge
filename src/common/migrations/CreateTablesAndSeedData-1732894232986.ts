@@ -6,7 +6,7 @@ export class CreateTablesAndSeedData1732894232986
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      readFileSync('src/migrations/database.sql', 'utf8'),
+      readFileSync('src/common/migrations/database.sql', 'utf8'),
     );
   }
 
