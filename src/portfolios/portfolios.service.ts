@@ -83,7 +83,7 @@ export class PortfoliosService {
     };
   }
 
-  async upsert(
+  async sync(
     accountNumber: string,
     entityManager?: EntityManager,
   ): Promise<Portfolio> {

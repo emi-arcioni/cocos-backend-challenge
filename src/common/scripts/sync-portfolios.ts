@@ -20,7 +20,7 @@ export class SyncPortfoliosCommand extends CommandRunner {
     try {
       const users = await this.userRepository.findAll();
       for (const user of users) {
-        await this.portfoliosService.upsert(user.accountNumber);
+        await this.portfoliosService.sync(user.accountNumber);
       }
       console.log('Portfolios synced successfully');
     } catch (error) {

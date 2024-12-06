@@ -5,6 +5,8 @@ import {
   HttpStatus,
   HttpException,
   Res,
+  Param,
+  Delete,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -32,5 +34,11 @@ export class OrdersController {
       default:
         return response.status(HttpStatus.OK).json(order);
     }
+  }
+
+  @Delete(':id')
+  async cancelOrder(@Param('id') id: number, @Res() response: Response) {
+    const order = await this.ordersService.cancel(id);
+    return response.status(HttpStatus.OK).json(order);
   }
 }

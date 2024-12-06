@@ -27,7 +27,8 @@ export class OrderRepository {
     });
   }
 
-  save(order: Order): Promise<Order> {
-    return this.orders.save(order);
+  save(order: Order, entityManager?: EntityManager): Promise<Order> {
+    const repo = entityManager?.getRepository(Order) || this.orders;
+    return repo.save(order);
   }
 }

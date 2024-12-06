@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { DataSource, QueryRunner } from 'typeorm';
 import { Order } from '../orders/entities/order.entity';
 import { CreateOrderDto } from '../orders/dto/create-order.dto';
 import { InstrumentsService } from '../instruments/instruments.service';
@@ -10,6 +10,7 @@ import { Currency } from '../common/enums/Currency.enum';
 import { MarketDataService } from '../market-data/market-data.service';
 import { UsersService } from '../users/users.service';
 import { PortfoliosService } from '../portfolios/portfolios.service';
+import { OrderRepository } from './order.repository';
 
 @Injectable()
 export class OrdersService {
@@ -19,12 +20,18 @@ export class OrdersService {
     private readonly portfoliosService: PortfoliosService,
     private readonly marketDataService: MarketDataService,
     private readonly dataSource: DataSource,
+    private readonly orderRepository: OrderRepository,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto): Promise<Order> {
+  private async startTransaction(): Promise<QueryRunner> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+    return queryRunner;
+  }
+
+  async create(createOrderDto: CreateOrderDto): Promise<Order> {
+    const queryRunner = await this.startTransaction();
 
     try {
       const { accountNumber, side, investmentAmount } = createOrderDto;
@@ -38,9 +45,9 @@ export class OrdersService {
 
       // Lock user's orders to prevent concurrent modifications during transaction (pessimistic approach)
       await queryRunner.manager
-        .createQueryBuilder(Order, 'order')
+        .createQueryBuilder(Order, 'orders')
         .setLock('pessimistic_write')
-        .innerJoinAndSelect('order.user', 'user')
+        .innerJoinAndSelect('orders.user', 'user')
         .where('user.accountNumber = :accountNumber', { accountNumber })
         .getMany();
 
@@ -119,9 +126,12 @@ export class OrdersService {
         status,
       });
 
-      const savedOrder = await queryRunner.manager.save(order);
+      const savedOrder = await this.orderRepository.save(
+        order,
+        queryRunner.manager,
+      );
 
-      await this.portfoliosService.upsert(accountNumber, queryRunner.manager);
+      await this.portfoliosService.sync(accountNumber, queryRunner.manager);
 
       await queryRunner.commitTransaction();
       return savedOrder;
@@ -131,5 +141,39 @@ export class OrdersService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async cancel(id: number): Promise<Order> {
+    const queryRunner = await this.startTransaction();
+    await queryRunner.manager
+      .getRepository(Order)
+      .createQueryBuilder('orders')
+      .setLock('pessimistic_write')
+      .where('orders.id = :id', { id })
+      .getOne();
+
+    const order = await queryRunner.manager.getRepository(Order).findOne({
+      where: { id },
+    });
+
+    if (!order) {
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+      throw new NotFoundException('Order not found');
+    }
+
+    if (order.status !== OrderStatus.NEW) {
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+      throw new BadRequestException('Only NEW orders can be cancelled');
+    }
+
+    order.status = OrderStatus.CANCELLED;
+    const savedOrder = await queryRunner.manager.save(order);
+
+    await queryRunner.commitTransaction();
+    await queryRunner.release();
+
+    return savedOrder;
   }
 }
