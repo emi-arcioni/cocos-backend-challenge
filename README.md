@@ -132,6 +132,10 @@ curl -X POST http://localhost:3000/orders \
 curl http://localhost:3000/portfolios/10001
 ```
 
+### Postman Collection
+
+You can import the `Cocos_Backend_Challenge.postman_collection.json` file to Postman to test the API endpoints.
+
 ## Development
 
 ### Code Style
