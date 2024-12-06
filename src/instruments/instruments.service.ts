@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InstrumentRepository } from './instrument.repository';
 import { Instrument } from './entities/instrument.entity';
 import { FindInstrumentsOptions } from './types/instruments';
@@ -11,13 +11,26 @@ interface PaginationOptions {
 
 @Injectable()
 export class InstrumentsService {
+  private readonly logger = new Logger(InstrumentsService.name);
+
   constructor(private readonly instrumentRepository: InstrumentRepository) {}
 
   async findAll(
     options?: FindInstrumentsOptions,
     pagination?: PaginationOptions,
   ): Promise<PaginatedResponse<Instrument>> {
-    return this.instrumentRepository.findAll(options, pagination);
+    this.logger.log('Fetching all instruments');
+    try {
+      const result = await this.instrumentRepository.findAll(
+        options,
+        pagination,
+      );
+      this.logger.debug(`Found ${result.items.length} instruments`);
+      return result;
+    } catch (error) {
+      this.logger.error('Failed to fetch instruments', error.stack);
+      throw error;
+    }
   }
 
   async findByTicker(ticker: string): Promise<Instrument> {

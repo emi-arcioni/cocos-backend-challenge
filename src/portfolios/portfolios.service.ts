@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PortfolioRepository } from './portfolio.repository';
 import { Portfolio } from './entities/portfolio.entity';
 import { MarketDataService } from '../market-data/market-data.service';
@@ -13,6 +13,8 @@ import { InstrumentType } from '../common/enums/InstrumentType.enum';
 
 @Injectable()
 export class PortfoliosService {
+  private readonly logger = new Logger(PortfoliosService.name);
+
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly marketDataService: MarketDataService,
@@ -87,82 +89,97 @@ export class PortfoliosService {
     accountNumber: string,
     entityManager?: EntityManager,
   ): Promise<Portfolio> {
-    // Get all filled orders for the account using repository method
-    const orders = entityManager
-      ? await this.orderRepository.findAllByAccountNumberAndStatus(
-          accountNumber,
-          OrderStatus.FILLED,
-          entityManager,
-        )
-      : await this.orderRepository.findAllByAccountNumberAndStatus(
-          accountNumber,
-          OrderStatus.FILLED,
-        );
+    this.logger.debug(`Syncing portfolio for account ${accountNumber}`);
+    try {
+      // Get all filled orders for the account using repository method
+      const orders = entityManager
+        ? await this.orderRepository.findAllByAccountNumberAndStatus(
+            accountNumber,
+            OrderStatus.FILLED,
+            entityManager,
+          )
+        : await this.orderRepository.findAllByAccountNumberAndStatus(
+            accountNumber,
+            OrderStatus.FILLED,
+          );
 
-    // Get the map of current market prices for all instruments
-    const marketDataMap = await this.marketDataService.findAll();
-
-    // Initialize portfolio map and balance
-    const portfolioOverview: Map<number, PortfolioOverview> = new Map();
-    let balance = 0;
-
-    // Process each order to build the portfolio
-    orders.forEach((order) => {
-      const orderValue = order.size * order.price;
-      balance += this.updateBalance(order, orderValue);
-
-      const { id: instrumentId, type } = order.instrument;
-
-      // Get existing position or initialize new one
-      const currentPosition =
-        portfolioOverview.get(instrumentId) ||
-        ({
-          totalShares: 0,
-          totalCost: 0,
-          averagePrice: 0,
-          marketValue: 0,
-          netProfit: 0,
-          unrealizedPnL: 0,
-          totalProfit: 0,
-          performance: 0,
-          orders: [],
-        } as PortfolioOverview);
-
-      // Update position with new order and current market price
-      const updatedPosition = this.updatePosition(order, currentPosition);
-      const currentPrice = marketDataMap.get(instrumentId) || 0;
-      const finalPosition = this.calculateMarketMetrics(
-        updatedPosition,
-        currentPrice,
+      this.logger.debug(
+        `Found ${orders.length} filled orders for account ${accountNumber}`,
       );
 
-      // Only store "ACCIONES" positions in the portfolio
-      if (type === InstrumentType.ACCIONES) {
-        portfolioOverview.set(instrumentId, {
-          ...finalPosition,
-          instrument: {
-            ticker: order.instrument.ticker,
-            name: order.instrument.name,
-          },
-          orders: [
-            ...currentPosition.orders,
-            // Ignore the linter warning since we intentionally omit instrument and user
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            (({ instrument, user, ...rest }) => rest)(order),
-          ],
-        });
-      }
-    });
+      // Get the map of current market prices for all instruments
+      const marketDataMap = await this.marketDataService.findAll();
 
-    const user = await this.usersService.findOne(accountNumber);
+      // Initialize portfolio map and balance
+      const portfolioOverview: Map<number, PortfolioOverview> = new Map();
+      let balance = 0;
 
-    const portfolio = new Portfolio({
-      user,
-      balance,
-      overview: Array.from(portfolioOverview.values()),
-    });
+      // Process each order to build the portfolio
+      orders.forEach((order) => {
+        const orderValue = order.size * order.price;
+        balance += this.updateBalance(order, orderValue);
 
-    // Use repository method for upsert
-    return this.portfolioRepository.upsert(portfolio, entityManager);
+        const { id: instrumentId, type } = order.instrument;
+
+        // Get existing position or initialize new one
+        const currentPosition =
+          portfolioOverview.get(instrumentId) ||
+          ({
+            totalShares: 0,
+            totalCost: 0,
+            averagePrice: 0,
+            marketValue: 0,
+            netProfit: 0,
+            unrealizedPnL: 0,
+            totalProfit: 0,
+            performance: 0,
+            orders: [],
+          } as PortfolioOverview);
+
+        // Update position with new order and current market price
+        const updatedPosition = this.updatePosition(order, currentPosition);
+        const currentPrice = marketDataMap.get(instrumentId) || 0;
+        const finalPosition = this.calculateMarketMetrics(
+          updatedPosition,
+          currentPrice,
+        );
+
+        // Only store "ACCIONES" positions in the portfolio
+        if (type === InstrumentType.ACCIONES) {
+          portfolioOverview.set(instrumentId, {
+            ...finalPosition,
+            instrument: {
+              ticker: order.instrument.ticker,
+              name: order.instrument.name,
+            },
+            orders: [
+              ...currentPosition.orders,
+              // Ignore the linter warning since we intentionally omit instrument and user
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              (({ instrument, user, ...rest }) => rest)(order),
+            ],
+          });
+        }
+      });
+
+      const user = await this.usersService.findOne(accountNumber);
+
+      const portfolio = new Portfolio({
+        user,
+        balance,
+        overview: Array.from(portfolioOverview.values()),
+      });
+
+      this.logger.debug(
+        `Portfolio sync completed for account ${accountNumber}`,
+      );
+      return this.portfolioRepository.upsert(portfolio, entityManager);
+    } catch (error) {
+      this.logger.error(
+        `Failed to sync portfolio for account ${accountNumber}`,
+        error.stack,
+      );
+      throw error;
+    }
   }
 }

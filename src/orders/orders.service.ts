@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { DataSource, QueryRunner } from 'typeorm';
 import { Order } from '../orders/entities/order.entity';
@@ -18,6 +19,8 @@ import { OrderRepository } from './order.repository';
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     private readonly instrumentsService: InstrumentsService,
     private readonly usersService: UsersService,
@@ -35,6 +38,9 @@ export class OrdersService {
   }
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
+    this.logger.debug(
+      `Placing new order for user ${createOrderDto.accountNumber}`,
+    );
     const queryRunner = await this.startTransaction();
 
     try {
@@ -138,9 +144,22 @@ export class OrdersService {
       await this.portfoliosService.sync(accountNumber, queryRunner.manager);
 
       await queryRunner.commitTransaction();
+      this.logger.debug(
+        `Placed order ${savedOrder.id} for user ${accountNumber} (${status})`,
+        {
+          buyWithEnoughBalance,
+          sellWithEnoughShares,
+          cashOutWithEnoughBalance,
+          investmentAmountIsEnough,
+        },
+      );
       return savedOrder;
     } catch (err) {
       await queryRunner.rollbackTransaction();
+      this.logger.error(
+        `Failed to place order for user ${createOrderDto.accountNumber}`,
+        err.stack,
+      );
       throw err;
     } finally {
       await queryRunner.release();
