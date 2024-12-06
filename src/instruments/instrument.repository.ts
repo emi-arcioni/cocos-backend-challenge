@@ -3,6 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Instrument } from './entities/instrument.entity';
 import { FindInstrumentsOptions } from './types/instruments';
 import { FindOperator, ILike, Repository } from 'typeorm';
+import { PaginationMeta } from './types/paginationMeta';
+import { PaginatedResponse } from './types/PaginatedResponse';
+
+interface PaginationOptions {
+  page: number;
+  limit: number;
+}
 
 @Injectable()
 export class InstrumentRepository {
@@ -11,7 +18,10 @@ export class InstrumentRepository {
     private instruments: Repository<Instrument>,
   ) {}
 
-  findAll(options?: FindInstrumentsOptions): Promise<Instrument[]> {
+  async findAll(
+    options?: FindInstrumentsOptions,
+    pagination?: PaginationOptions,
+  ): Promise<PaginatedResponse<Instrument>> {
     const where: {
       ticker?: FindOperator<string>;
       name?: FindOperator<string>;
@@ -19,7 +29,25 @@ export class InstrumentRepository {
     if (options?.ticker) where.ticker = ILike(`%${options.ticker}%`);
     if (options?.name) where.name = ILike(`%${options.name}%`);
 
-    return this.instruments.find({ where });
+    const page = pagination?.page || 1;
+    const limit = pagination?.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const [items, totalItems] = await this.instruments.findAndCount({
+      where,
+      skip,
+      take: limit,
+    });
+
+    const meta: PaginationMeta = {
+      itemCount: items.length,
+      totalItems,
+      itemsPerPage: limit,
+      totalPages: Math.ceil(totalItems / limit),
+      currentPage: page,
+    };
+
+    return { items, meta };
   }
 
   findByTicker(ticker: string): Promise<Instrument> {
